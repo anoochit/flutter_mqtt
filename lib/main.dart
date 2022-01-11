@@ -84,6 +84,10 @@ class _HomePageState extends State<HomePage> {
         child: StreamBuilder(
           stream: mqttSubscribe('hello'),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+
             if (snapshot.hasData) {
               List<MqttReceivedMessage<MqttMessage>> mqttRecieveMessage = snapshot.data;
               MqttPublishMessage recieveMessage = mqttRecieveMessage[0].payload;
