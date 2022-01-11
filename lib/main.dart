@@ -35,7 +35,7 @@ MqttServerClient client;
 class _HomePageState extends State<HomePage> {
   mqttConnect() async {
     // init client
-    client = new MqttServerClient('192.168.1.42', 'clientIdentifier1234');
+    client = MqttServerClient('test.mosquitto.org', 'clientIdentifier1234');
     client.keepAlivePeriod = 60;
     client.autoReconnect = true;
     client.onConnected = onConnected;
@@ -47,11 +47,17 @@ class _HomePageState extends State<HomePage> {
     } on NoConnectionException catch (e) {
       log(e.toString());
     }
+
+    return client;
   }
 
   Stream<List<MqttReceivedMessage<MqttMessage>>> mqttSubscribe(String topic) {
-    client.subscribe(topic, MqttQos.exactlyOnce);
-    return client.updates;
+    if (client.connectionStatus.state == MqttConnectionState.connected) {
+      client.subscribe(topic, MqttQos.atLeastOnce);
+      return client.updates;
+    } else {
+      return null;
+    }
   }
 
   void onDisconnected() {
@@ -79,11 +85,9 @@ class _HomePageState extends State<HomePage> {
           stream: mqttSubscribe('hello'),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
-              List<MqttReceivedMessage<MqttMessage>> mqttRecieveMessage =
-                  snapshot.data;
+              List<MqttReceivedMessage<MqttMessage>> mqttRecieveMessage = snapshot.data;
               MqttPublishMessage recieveMessage = mqttRecieveMessage[0].payload;
-              String payload = MqttPublishPayload.bytesToStringAsString(
-                  recieveMessage.payload.message);
+              String payload = MqttPublishPayload.bytesToStringAsString(recieveMessage.payload.message);
 
               return Center(
                 child: Text(payload),
