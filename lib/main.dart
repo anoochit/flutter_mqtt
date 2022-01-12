@@ -72,12 +72,12 @@ class _HomePageState extends State<HomePage> {
                   }
                 }
 
-                return CircularProgressIndicator();
+                return Center(child: CircularProgressIndicator());
               },
             );
           }
 
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         },
       ),
     );
